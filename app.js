@@ -110,7 +110,7 @@ const builder = {
 
 
 
-const a = JSON.parse(`
+const RAW_DATA = JSON.parse(`
 {
   "items": [
     {
@@ -209,54 +209,53 @@ class Product {
       .className("bag-btn")
       .html(`<i class="fas fa-shopping-cart"></i>
     <span>Add to cart</span>
-    <i class="fas fa-shopping-cart"></i>`).on("click", () => {
-        console.log('hah');
-        let r = crmanager.cartItemsList.findIndex(x => x.id === this.id);
-        console.log(r);
-        if (r === -1) {
-          let crItem = new CartItem(
+    <i class="fas fa-shopping-cart"></i>`)
+      .on("click", () => {
+        const index = cartManager.cartItemsList.findIndex(x => x.id === this.id);
+        if (index === -1) {
+          const cartItem = new CartItem(
             this.id,
             this.price,
             this.title,
             this.image);
 
-          crItem.countainer++;
-          crItem.totalItemPrice = crItem.price * crItem.countainer;
-          crmanager.cartItemsList.push(crItem);
+          cartItem.countainer++;
+          cartItem.totalItemPrice = cartItem.price * cartItem.countainer;
+          cartManager.cartItemsList.push(cartItem);
           document.getElementsByClassName("cart-items")[0].textContent =
-            ++crmanager.totalItem;
+            ++cartManager.totalItem;
         } else {
-          let k = crmanager.cartItemsList[crmanager.cartItemsList.findIndex(x => x.id === this.id)]
-          k.totalItem++;
-          k.countainer++;
-          k.totalItemPrice = k.price * k.countainer;
+          const item = cartManager.cartItemsList[cartManager.cartItemsList.findIndex(x => x.id === this.id)]
+          item.totalItem++;
+          item.countainer++;
+          item.totalItemPrice = item.price * item.countainer;
           document.getElementsByClassName("cart-items")[0].textContent =
-            ++crmanager.totalItem;
+            ++cartManager.totalItem;
         }
 
-        crmanager.init();
+        cartManager.init();
       })
       .appendTo(imagecountainer);
     builder.create("h3").html(this.title).appendTo(product)
   }
 }
 
-class proBuilder {
+class ProductBuilder {
   constructor() {
-    a.items.map((item) => {
-      const newpro = new Product(
+    RAW_DATA.items.map((item) => {
+      const productInstance = new Product(
         item.fields.title,
         item.fields.image.fields.file.url,
         item.sys.id,
         item.fields.price
       );
-      newpro.init();
+      productInstance.init();
 
     });
 
   }
 }
-const newprobuilder = new proBuilder();
+const productBuilderInstance = new ProductBuilder();
 
 
 class CartItem {
@@ -318,11 +317,13 @@ class CartManager {
       builder.create("h4").html(item.title).appendTo(itin);
       builder.create("h5").html(item.totalItemPrice).appendTo(itin);
       builder.create("div").className("remove-item").html("remove").on("click", () => {
-        let e = this.cartItemsList.findIndex(x => x.id === item.id);
-        this.totalItem -= this.cartItemsList[e].countainer;
-        this.cartItemsList.splice(e, 1);
-        document.getElementsByClassName("cart-items")[0].textContent = crmanager.totalItem;
-        crmanager.init();
+        const index = this.cartItemsList.findIndex(x => x.id === item.id);
+        if(index !== -1) {
+          this.totalItem -= this.cartItemsList[index].countainer;
+          this.cartItemsList.splice(index, 1);
+          document.getElementsByClassName("cart-items")[0].textContent = cartManager.totalItem;
+          cartManager.init();
+        }
       })
         .appendTo(itin);
       const amDiv = builder.create("div").appendTo(cartItem);
@@ -330,9 +331,9 @@ class CartManager {
         .on("click", () => {
           item.countainer++;
           item.totalItemPrice = item.countainer * item.price;
-          crmanager.totalItem++;
-          document.getElementsByClassName("cart-items")[0].textContent = crmanager.totalItem;
-          crmanager.init();
+          cartManager.totalItem++;
+          document.getElementsByClassName("cart-items")[0].textContent = cartManager.totalItem;
+          cartManager.init();
         })
         .appendTo(amDiv);
       builder.create("div")
@@ -342,13 +343,15 @@ class CartManager {
       builder.create("i").className("fas fa-chevron-down").on("click", () => {
         item.countainer--;
         item.totalItemPrice = item.countainer * item.price;
-        crmanager.totalItem--;
-        document.getElementsByClassName("cart-items")[0].textContent = crmanager.totalItem;
+        cartManager.totalItem--;
+        document.getElementsByClassName("cart-items")[0].textContent = cartManager.totalItem;
         if (item.countainer <= 0) {
-          let e = crmanager.cartItemsList.findIndex(x => x.id === item.id);
-          this.cartItemsList.splice(e, 1);
+          const index = cartManager.cartItemsList.findIndex(x => x.id === item.id);
+          if(index !== -1) {
+            this.cartItemsList.splice(index, 1);
+          }
         }
-        crmanager.init();
+        cartManager.init();
 
       })
         .appendTo(amDiv);
@@ -358,16 +361,16 @@ class CartManager {
       .appendTo(crfooter);
     builder.create("button").className("banner-btn")
       .html("clear Cart").on("click", () => {
-        crmanager.totalItem = 0;
-        document.getElementsByClassName("cart-items")[0].textContent = crmanager.totalItem;
-        crmanager.cartItemsList = [];
-        crmanager.init();
+        cartManager.totalItem = 0;
+        document.getElementsByClassName("cart-items")[0].textContent = cartManager.totalItem;
+        cartManager.cartItemsList = [];
+        cartManager.init();
       })
       .appendTo(crfooter);
   }
 
 }
-let crmanager = new CartManager();
+const cartManager = new CartManager();
 
 
 
